@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 import './App.css';
 import axios from 'axios';
+// import ReactDOM from 'react-dom';
+import Modal from 'react-modal';
 
 class App extends Component {
-  state = {movies: []}
+  state = {movies: [], modalIsOpen: false, selectedMovie: []}
   loadMore() {
     this.pageNumber++;
     axios.get('/movies', {params: {
@@ -16,21 +18,27 @@ class App extends Component {
         return this.setState({movies: newMovies});
     })
   }
-  // TODO: refactor into List + List-Item views.
+
+  openModal() {
+    this.setState({modalIsOpen: true});
+  }
+
+  closeModal() {
+    this.setState({modalIsOpen: false});
+  }
   showIndividualView = (e, movie) => {
-    this.individualView = true;
     axios.get('/movies/' + movie.id, {params: {
       id: movie.id
     }})
     .then(movie => {
-        console.log(movie, 'the movie returned from showIndividualView')
-        return this.setState({movies: [movie.data]});
+        this.setState({selectedMovie: movie.data});
+        return this.openModal();
     })
   }
 
-  backToSummaryView = () => {
+ 
+  componentDidMount() {
     this.pageNumber = 1;
-    this.individualView = false;
     axios.get('/movies', {params: {
       page: this.pageNumber
     }})
@@ -39,31 +47,36 @@ class App extends Component {
         return this.setState({movies: movies.data.results});
     })
   }
- 
-  componentDidMount() {
-    this.backToSummaryView()
-  }
   render() {
     return (
       <div className="App">
-        <h1>movies</h1>
+        
         <button onClick={this.loadMore.bind(this)}>Load More </button>
-        <button onClick={this.backToSummaryView.bind(this)}> Back To Summary</button>
+        
         <div className="grid">
           {this.state.movies.map(movie =>
             <div key={movie.id} className="grid-item">
-              <div>{movie.title}</div>
-              {this.individualView &&
-                <div>
-                <div><b>overview: </b>{movie.overview}</div>
-              <div><b>tagline:</b>{movie.tagline}</div>
-              <div><b>status: </b>{movie.status}</div>
-              </div>
-            }
-              {!movie.notFound && <img onClick={(e) => this.showIndividualView(e, movie)} alt="movie" src={'http://image.tmdb.org/t/p/w185/' + movie.poster_path}></img>}
+              <div>{movie.title}</div>      
+              {<img onClick={(e) => this.showIndividualView(e, movie)} alt="movie" src={'http://image.tmdb.org/t/p/w185/' + movie.poster_path}></img>}
             </div>
           )}
         </div>
+
+         <Modal
+          isOpen={this.state.modalIsOpen}
+          onRequestClose={this.closeModal.bind(this)}
+          contentLabel="Example Modal"
+          > 
+          <button onClick={this.closeModal.bind(this)}>close</button>
+            <div className="Aligner">
+              <div className="Aligner-item">
+                <img alt="movie" src={'http://image.tmdb.org/t/p/w342/' + this.state.selectedMovie.poster_path}></img>
+                <div><b>overview: </b>{this.state.selectedMovie.overview}</div>
+                <div><b>tagline:</b>{this.state.selectedMovie.tagline}</div>
+                <div><b>status:</b>{this.state.selectedMovie.status}</div>
+              </div>
+            </div>
+          </Modal>
       </div>
     );
   }

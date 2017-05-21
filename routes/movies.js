@@ -12,9 +12,8 @@ router.get('/', function(req, res, next) {
 });
 router.get('/:id', function (req, res, next) {
 	let id = req.params.id;
-	request('http://api.themoviedb.org/3/movie/' + req.params.id + '?api_key=' + apiKey, (error, response, body) => {
+	request('http://api.themoviedb.org/3/movie/' + id + '?api_key=' + apiKey, (error, response, body) => {
         if (!error && response.statusCode == 200) {
-        	console.log('the individual movie', body)
         	res.send(body)
         }
 

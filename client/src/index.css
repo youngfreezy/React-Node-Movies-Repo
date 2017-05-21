@@ -23,6 +23,12 @@ body {
   float: none;
 }
 
-.centered {
-  margin-left: 43%;
+.Aligner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.Aligner-item {
+  max-width: 50%;
 }
